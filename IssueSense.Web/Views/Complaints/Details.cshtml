@@ -1,0 +1,310 @@
+@model IssueSense.Web.Models.Complaints.ComplaintDetailsPageViewModel
+@using IssueSense.Domain.Common
+
+@{
+    ViewData["Title"] = "Complaint Details";
+
+    static string BadgeClass(string value) => value.ToLowerInvariant() switch
+    {
+        "new" => "bg-blue-100 text-blue-700 ring-blue-200",
+        "inprogress" => "bg-amber-100 text-amber-700 ring-amber-200",
+        "resolved" => "bg-emerald-100 text-emerald-700 ring-emerald-200",
+        "closed" => "bg-slate-200 text-slate-700 ring-slate-300",
+        "escalated" => "bg-rose-100 text-rose-700 ring-rose-200",
+        "normal" => "bg-emerald-100 text-emerald-700 ring-emerald-200",
+        "negative" => "bg-rose-100 text-rose-700 ring-rose-200",
+        "neutral" => "bg-slate-100 text-slate-700 ring-slate-200",
+        "positive" => "bg-emerald-100 text-emerald-700 ring-emerald-200",
+        "high" => "bg-rose-100 text-rose-700 ring-rose-200",
+        "medium" => "bg-amber-100 text-amber-700 ring-amber-200",
+        "low" => "bg-sky-100 text-sky-700 ring-sky-200",
+        _ => "bg-slate-100 text-slate-700 ring-slate-200"
+    };
+}
+
+<div class="relative overflow-hidden rounded-[2.2rem] border border-white/80 bg-white/90 p-6 shadow-soft backdrop-blur sm:p-8">
+    <div class="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <div class="max-w-3xl">
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-flex rounded-full border border-accent-100 bg-accent-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent-700">Complaint Case</span>
+                <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset @BadgeClass(Model.Complaint.Status.ToString())">@Model.Complaint.Status</span>
+                <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset @BadgeClass(Model.Complaint.EscalationStatus.ToString())">@Model.Complaint.EscalationStatus</span>
+                @if (Model.Complaint.IsArchived)
+                {
+                    <span class="inline-flex rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-inset ring-slate-300">Archived</span>
+                }
+            </div>
+            <h1 class="mt-5 text-3xl font-semibold tracking-tight text-slatebrand-900 sm:text-[2.2rem]">@Model.Complaint.Title</h1>
+            <p class="mt-3 max-w-2xl text-sm leading-7 text-slatebrand-600">Created by <span class="font-semibold text-slatebrand-800">@Model.Complaint.CreatedByUserName</span> for <span class="font-semibold text-slatebrand-800">@Model.Complaint.CustomerName</span>. This case view combines workflow status, AI interpretation, and operational follow-up in one place.</p>
+        </div>
+        <div class="flex flex-col items-start gap-3 sm:flex-row lg:flex-col lg:items-end">
+            <div class="rounded-2xl border border-slatebrand-100 bg-white/90 px-4 py-3 text-left shadow-sm lg:text-right">
+                <div class="text-[11px] font-semibold uppercase tracking-[0.2em] text-slatebrand-400">Created</div>
+                <div class="mt-1 text-sm font-medium text-slatebrand-700">@Model.Complaint.CreatedAtUtc.ToLocalTime().ToString("g")</div>
+            </div>
+            <a asp-action="Index" class="inline-flex items-center justify-center rounded-2xl border border-slatebrand-200 bg-white px-5 py-3 text-sm font-semibold text-slatebrand-700 transition hover:border-slatebrand-300 hover:bg-slatebrand-50">Back to List</a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">@successMessage</div>
+}
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">@errorMessage</div>
+}
+
+<div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.85fr)_23rem]">
+    <div class="space-y-6">
+        <section class="rounded-[2.1rem] border border-white/70 bg-white/90 p-6 shadow-soft backdrop-blur sm:p-8">
+            <div class="flex flex-col gap-3 border-b border-slatebrand-100 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold tracking-tight text-slatebrand-900">Complaint Snapshot</h2>
+                    <p class="mt-2 text-sm leading-6 text-slatebrand-600">A quick read on customer identity, case state, AI confidence, and routing ownership.</p>
+                </div>
+                <div class="rounded-2xl bg-slatebrand-50 px-4 py-3 text-left sm:text-right">
+                    <div class="text-[11px] font-semibold uppercase tracking-[0.2em] text-slatebrand-400">Last Updated</div>
+                    <div class="mt-1 text-sm font-medium text-slatebrand-700">@Model.Complaint.UpdatedAtUtc.ToLocalTime().ToString("g")</div>
+                </div>
+            </div>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+                <article class="rounded-[1.7rem] border border-sky-100 bg-gradient-to-br from-slatebrand-50 via-white to-sky-50 p-5 xl:col-span-2">
+                    <div class="text-sm font-medium text-slatebrand-500">Customer Email</div>
+                    <div class="mt-3 break-all text-[1.75rem] font-semibold tracking-tight text-slatebrand-900">@Model.Complaint.CustomerEmail</div>
+                </article>
+
+                <article class="rounded-[1.7rem] border border-slatebrand-200 bg-gradient-to-br from-slatebrand-50 via-white to-white p-5 xl:col-span-2">
+                    <div class="text-sm font-medium text-slatebrand-500">Status</div>
+                    <div class="mt-4"><span class="inline-flex min-w-[9rem] items-center justify-center rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-inset @BadgeClass(Model.Complaint.Status.ToString())">@Model.Complaint.Status</span></div>
+                </article>
+
+                <article class="rounded-[1.7rem] border border-slatebrand-200 bg-gradient-to-br from-slatebrand-50 via-white to-white p-5 xl:col-span-2">
+                    <div class="text-sm font-medium text-slatebrand-500">Category</div>
+                    <div class="mt-3 text-[1.75rem] font-semibold tracking-tight text-slatebrand-900">@Model.Complaint.Category</div>
+                </article>
+
+                <article class="rounded-[1.7rem] border border-rose-100 bg-gradient-to-br from-rose-50/70 via-white to-white p-5 xl:col-span-2">
+                    <div class="text-sm font-medium text-slatebrand-500">Sentiment</div>
+                    <div class="mt-4"><span class="inline-flex min-w-[9rem] items-center justify-center rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-inset @BadgeClass(Model.Complaint.Sentiment.ToString())">@Model.Complaint.Sentiment</span></div>
+                </article>
+
+                <article class="rounded-[1.7rem] border border-amber-100 bg-gradient-to-br from-amber-50/70 via-white to-white p-5 xl:col-span-2">
+                    <div class="text-sm font-medium text-slatebrand-500">Urgency</div>
+                    <div class="mt-4"><span class="inline-flex min-w-[9rem] items-center justify-center rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-inset @BadgeClass(Model.Complaint.Urgency.ToString())">@Model.Complaint.Urgency</span></div>
+                </article>
+
+                <article class="rounded-[1.7rem] border border-rose-100 bg-gradient-to-br from-rose-50/60 via-white to-white p-5 xl:col-span-2">
+                    <div class="text-sm font-medium text-slatebrand-500">Escalation</div>
+                    <div class="mt-4"><span class="inline-flex min-w-[9rem] items-center justify-center rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-inset @BadgeClass(Model.Complaint.EscalationStatus.ToString())">@Model.Complaint.EscalationStatus</span></div>
+                </article>
+
+                <article class="rounded-[1.7rem] border border-slatebrand-200 bg-gradient-to-br from-slatebrand-50 via-white to-white p-5 xl:col-span-2">
+                    <div class="text-sm font-medium text-slatebrand-500">AI Confidence</div>
+                    <div class="mt-3 text-[1.75rem] font-semibold tracking-tight text-slatebrand-900">@($"{Model.Complaint.Confidence:P0}")</div>
+                </article>
+
+                <article class="rounded-[1.7rem] border border-slatebrand-200 bg-gradient-to-br from-slatebrand-50 via-white to-white p-5 xl:col-span-4">
+                    <div class="text-sm font-medium text-slatebrand-500">Assigned Owner</div>
+                    <div class="mt-3 text-[1.9rem] font-semibold tracking-tight text-slatebrand-900">@(string.IsNullOrWhiteSpace(Model.Complaint.AssignedOwner) ? "Unassigned" : Model.Complaint.AssignedOwner)</div>
+                </article>
+            </div>
+
+            @if (Model.Complaint.EscalationStatus == IssueSense.Domain.Enums.EscalationStatus.Escalated)
+            {
+                <div class="mt-6 rounded-[1.6rem] border border-rose-200 bg-gradient-to-r from-rose-50 via-white to-rose-50 px-5 py-4 text-sm leading-6 text-rose-700">
+                    <span class="font-semibold">Escalation Reason:</span> @Model.Complaint.EscalationReason
+                </div>
+            }
+            @if (Model.Complaint.IsArchived && Model.Complaint.ArchivedAtUtc.HasValue)
+            {
+                <div class="mt-4 rounded-[1.6rem] border border-slatebrand-200 bg-slatebrand-50 px-5 py-4 text-sm leading-6 text-slatebrand-700">
+                    <span class="font-semibold">Archived:</span> @Model.Complaint.ArchivedAtUtc.Value.ToLocalTime().ToString("g")
+                    @if (!string.IsNullOrWhiteSpace(Model.Complaint.ArchivedByUserName))
+                    {
+                        <span> by @Model.Complaint.ArchivedByUserName</span>
+                    }
+                </div>
+            }
+        </section>
+
+        <section class="overflow-hidden rounded-[2.1rem] border border-slatebrand-200 bg-gradient-to-br from-[#1f3045] via-[#203047] to-[#1a2738] p-6 text-white shadow-soft sm:p-8">
+            <div class="relative">
+                <div class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-sky-400/10 blur-3xl"></div>
+                <div class="pointer-events-none absolute -left-8 bottom-0 h-32 w-32 rounded-full bg-amber-300/10 blur-3xl"></div>
+
+                <div class="relative flex flex-col gap-3 border-b border-white/15 pb-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold tracking-tight text-white">AI Suggested Actions</h2>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-200">Recommended next steps based on the complaint text, urgency signal, and workflow context.</p>
+                    </div>
+                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold shadow-sm @(Model.Complaint.RequiresAction ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800")">@(Model.Complaint.RequiresAction ? "Action Required" : "No Immediate Action")</span>
+                </div>
+
+                @if (!Model.Complaint.SuggestedActions.Any())
+                {
+                    <div class="relative mt-6 rounded-[1.6rem] border border-white/10 bg-white/[0.06] px-5 py-5 text-sm leading-6 text-slate-200">
+                        No specific follow-up actions were suggested by the AI analysis.
+                    </div>
+                }
+                else
+                {
+                    <div class="relative mt-6 grid gap-4">
+                        @foreach (var item in Model.Complaint.SuggestedActions)
+                        {
+                            <article class="rounded-[1.6rem] border border-white/10 bg-gradient-to-r from-white/[0.10] to-white/[0.05] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div class="text-sm font-semibold tracking-[0.02em] text-sky-200">@item.Owner</div>
+                                </div>
+                                <p class="mt-3 text-sm leading-7 text-white/90">@item.Action</p>
+                            </article>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="rounded-[2.1rem] border border-white/70 bg-white/90 p-6 shadow-soft backdrop-blur sm:p-8">
+            <div class="flex flex-col gap-3 border-b border-slatebrand-100 pb-5">
+                <h2 class="text-xl font-semibold tracking-tight text-slatebrand-900">Complaint Description</h2>
+                <p class="text-sm leading-6 text-slatebrand-600">Original customer-provided content used for review and AI analysis.</p>
+            </div>
+            <div class="mt-6 rounded-[1.6rem] border border-slatebrand-200 bg-slatebrand-50 px-6 py-5">
+                <p class="whitespace-pre-line text-sm leading-8 text-slatebrand-700">@Model.Complaint.Description</p>
+            </div>
+        </section>
+
+        <section class="rounded-[2.1rem] border border-white/70 bg-white/90 p-6 shadow-soft backdrop-blur sm:p-8">
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold tracking-tight text-slatebrand-900">Comments</h2>
+                    <p class="mt-2 text-sm leading-6 text-slatebrand-600">Internal collaboration notes for triage, AI review, and case resolution.</p>
+                </div>
+                <span class="text-sm text-slatebrand-500">@Model.Complaint.Comments.Count comment(s)</span>
+            </div>
+
+            @if (User.IsInRole(RoleNames.SupportAdmin) || User.IsInRole(RoleNames.TriageOfficer) || User.IsInRole(RoleNames.CaseManager) || User.IsInRole(RoleNames.AiReviewer))
+            {
+                <form asp-action="AddComment" method="post" class="mb-6 space-y-3">
+                    <input asp-for="NewComment.ComplaintId" type="hidden" />
+                    <textarea asp-for="NewComment.Message" rows="4" class="w-full rounded-[1.5rem] border border-slatebrand-200 bg-white px-4 py-3 text-slatebrand-900 shadow-sm outline-none transition focus:border-accent-500 focus:ring-4 focus:ring-accent-100" placeholder="Write a case note, triage note, or AI review comment..."></textarea>
+                    <div class="flex items-start justify-between gap-4">
+                        <span asp-validation-for="NewComment.Message" class="block text-sm text-red-600"></span>
+                        <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-accent-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-500/20 transition hover:bg-accent-600">Post Comment</button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="mb-6 rounded-[1.5rem] border border-slatebrand-200 bg-slatebrand-50 px-5 py-4 text-sm text-slatebrand-600">
+                    @if (User.IsInRole(RoleNames.Analyst))
+                    {
+                        <span>Analysts have read-only access and cannot add comments or change complaint state.</span>
+                    }
+                    else
+                    {
+                        <span>Your current role can review this complaint, but cannot add comments in this workflow.</span>
+                    }
+                </div>
+            }
+
+            @if (!Model.Complaint.Comments.Any())
+            {
+                <p class="text-sm text-slatebrand-500">No comments added yet.</p>
+            }
+            else
+            {
+                <div class="space-y-4">
+                    @foreach (var comment in Model.Complaint.Comments)
+                    {
+                        <article class="rounded-[1.5rem] border border-slatebrand-200 bg-gradient-to-br from-slatebrand-50 to-white p-5">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <strong class="text-sm font-semibold text-slatebrand-900">@comment.AuthorUserName</strong>
+                                <span class="inline-flex rounded-full border border-slatebrand-200 bg-white px-3 py-1 text-xs font-medium text-slatebrand-500">@comment.CreatedAtUtc.ToLocalTime().ToString("g")</span>
+                            </div>
+                            <p class="mt-3 text-sm leading-7 text-slatebrand-700">@comment.Message</p>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+
+    <aside class="space-y-6">
+        <section class="rounded-[2.1rem] border border-slatebrand-200 bg-slatebrand-900 p-6 text-slatebrand-50 shadow-soft sm:p-8">
+            <h2 class="text-xl font-semibold tracking-tight text-white">Case Controls</h2>
+            <p class="mt-2 text-sm leading-6 text-slatebrand-300">Manage AI review, assignment, and workflow status from a single operational panel.</p>
+
+            <div class="mt-6 space-y-6">
+                @if (User.IsInRole(RoleNames.SupportAdmin) || User.IsInRole(RoleNames.CaseManager) || User.IsInRole(RoleNames.AiReviewer))
+                {
+                    <form asp-action="Reanalyze" method="post">
+                        @Html.AntiForgeryToken()
+                        <input name="complaintId" value="@Model.Complaint.Id" type="hidden" />
+                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-accent-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-500/20 transition hover:bg-accent-600">Re-analyze Complaint</button>
+                    </form>
+                }
+                @if (User.IsInRole(RoleNames.SupportAdmin) && !Model.Complaint.IsArchived)
+                {
+                    <form asp-action="Archive" method="post">
+                        @Html.AntiForgeryToken()
+                        <input name="complaintId" value="@Model.Complaint.Id" type="hidden" />
+                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl border border-rose-300 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100">Archive Complaint</button>
+                    </form>
+                }
+
+                @if (User.IsInRole(RoleNames.SupportAdmin) || User.IsInRole(RoleNames.CaseManager) || User.IsInRole(RoleNames.TriageOfficer))
+                {
+                    <form asp-action="UpdateAssignment" method="post" class="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+                        <input asp-for="AssignmentUpdate.ComplaintId" type="hidden" />
+                        <div>
+                            <label asp-for="AssignmentUpdate.AssignedOwner" class="mb-2 block text-sm font-medium text-slatebrand-100">Assign Owner</label>
+                            <select asp-for="AssignmentUpdate.AssignedOwner" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20">
+                                <option value="">Unassigned</option>
+                                <option value="@RoleNames.TriageOfficer">@RoleNames.TriageOfficer</option>
+                                <option value="@RoleNames.CaseManager">@RoleNames.CaseManager</option>
+                                <option value="@RoleNames.SupportAdmin">@RoleNames.SupportAdmin</option>
+                                <option value="@RoleNames.AiReviewer">@RoleNames.AiReviewer</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">Save Assignment</button>
+                    </form>
+                }
+
+                @if (User.IsInRole(RoleNames.SupportAdmin) || User.IsInRole(RoleNames.CaseManager) || User.IsInRole(RoleNames.TriageOfficer))
+                {
+                    <form asp-action="UpdateStatus" method="post" class="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+                        <input asp-for="StatusUpdate.ComplaintId" type="hidden" />
+                        <div>
+                            <label asp-for="StatusUpdate.Status" class="mb-2 block text-sm font-medium text-slatebrand-100">Update Status</label>
+                            <select asp-for="StatusUpdate.Status" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20" asp-items="Html.GetEnumSelectList<IssueSense.Domain.Enums.ComplaintStatus>()"></select>
+                        </div>
+                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">Save Status</button>
+                    </form>
+                    @if (User.IsInRole(RoleNames.TriageOfficer))
+                    {
+                        <p class="text-sm text-slatebrand-300">Triage officers can only move complaints from New to InProgress.</p>
+                    }
+                }
+                else
+                {
+                    @if (User.IsInRole(RoleNames.AiReviewer))
+                    {
+                        <p class="text-sm leading-6 text-slatebrand-300">AI reviewers can audit complaint analysis and add review comments, but cannot change workflow status.</p>
+                    }
+                    else
+                    {
+                        <p class="text-sm leading-6 text-slatebrand-300">Only support admins, triage officers, and case managers can change complaint status.</p>
+                    }
+                }
+            </div>
+        </section>
+    </aside>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
