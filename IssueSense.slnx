@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="IssueSense.Application/IssueSense.Application.csproj" />
+  <Project Path="IssueSense.Domain/IssueSense.Domain.csproj" />
+  <Project Path="IssueSense.Infrastructure/IssueSense.Infrastructure.csproj" />
+  <Project Path="IssueSense.Tests/IssueSense.Tests.csproj" />
+  <Project Path="IssueSense.Web/IssueSense.Web.csproj" />
+</Solution>
