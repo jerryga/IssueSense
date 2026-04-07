@@ -18,8 +18,16 @@ ASP.NET Core MVC application for AI-based complaint and sentiment analysis using
 ## Run
 
 1. Start MongoDB locally on `mongodb://localhost:27017`
-2. Run `dotnet build`
-3. Run `dotnet run --project IssueSense.Web`
+2. If you want demo seed data locally, set `SeedData=true`
+3. Run `dotnet build`
+4. Run `dotnet run --project IssueSense.Web`
+
+Notes:
+
+- `SeedData` now defaults to `false` for safer production behavior
+- in production or on Render, keep `SeedData=false`
+- the app now configures forwarded headers and secure cookies so it behaves correctly behind an HTTPS reverse proxy
+- MongoDB indexes are created automatically on startup, including a unique username index
 
 ## Test
 

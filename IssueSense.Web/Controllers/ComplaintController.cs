@@ -169,4 +169,19 @@ public sealed class ComplaintController(IComplaintService complaintService) : Co
         TempData["SuccessMessage"] = "Complaint re-analyzed successfully.";
         return RedirectToAction(nameof(Details), new { id = complaintId });
     }
+
+    [HttpPost]
+    [Authorize(Roles = RoleNames.SupportAdmin)]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Archive(string complaintId, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(complaintId))
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        await complaintService.ArchiveAsync(complaintId, User.GetDisplayName(), cancellationToken);
+        TempData["SuccessMessage"] = "Complaint archived successfully.";
+        return RedirectToAction(nameof(Index));
+    }
 }

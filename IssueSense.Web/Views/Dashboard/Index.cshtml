@@ -1,0 +1,185 @@
+@model IssueSense.Application.DTOs.Complaints.DashboardSummaryDto
+@using IssueSense.Domain.Common
+
+@{
+    ViewData["Title"] = "Dashboard";
+
+    static string ProgressClass(string label) => label.ToLowerInvariant() switch
+    {
+        "negative" => "bg-rose-500",
+        "positive" => "bg-emerald-500",
+        "neutral" => "bg-slate-500",
+        "high" => "bg-rose-500",
+        "medium" => "bg-amber-500",
+        "low" => "bg-sky-500",
+        "escalated" => "bg-rose-500",
+        "resolved" => "bg-emerald-500",
+        "closed" => "bg-slate-700",
+        "inprogress" => "bg-amber-500",
+        "new" => "bg-blue-500",
+        _ => "bg-accent-500"
+    };
+}
+
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <h1 class="text-3xl font-semibold tracking-tight text-slatebrand-900">Complaint Intelligence Dashboard</h1>
+        <p class="mt-2 text-sm text-slatebrand-600">Overview of complaint volume, urgency, escalation risk, and sentiment signals.</p>
+    </div>
+    @if (User.IsInRole(RoleNames.SupportAdmin) || User.IsInRole(RoleNames.TriageOfficer) || User.IsInRole(RoleNames.CaseManager))
+    {
+        <a asp-controller="Complaint" asp-action="Create" class="inline-flex items-center justify-center rounded-2xl bg-accent-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-500/20 transition hover:bg-accent-600">New Complaint</a>
+    }
+</div>
+
+<div class="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+    <div class="rounded-[1.75rem] border border-white/60 bg-white/90 p-5 shadow-soft backdrop-blur"><div class="metric-card"><span>Total Complaints</span><strong>@Model.TotalComplaints</strong></div></div>
+    <div class="rounded-[1.75rem] border border-white/60 bg-white/90 p-5 shadow-soft backdrop-blur"><div class="metric-card"><span>Open Complaints</span><strong>@Model.OpenComplaints</strong></div></div>
+    <div class="rounded-[1.75rem] border border-white/60 bg-white/90 p-5 shadow-soft backdrop-blur"><div class="metric-card"><span>Resolved / Closed</span><strong>@Model.ResolvedComplaints</strong></div></div>
+    <div class="rounded-[1.75rem] border border-white/60 bg-white/90 p-5 shadow-soft backdrop-blur"><div class="metric-card"><span>High Urgency</span><strong>@Model.HighUrgencyComplaints</strong></div></div>
+    <div class="rounded-[1.75rem] border border-white/60 bg-white/90 p-5 shadow-soft backdrop-blur"><div class="metric-card"><span>Negative Sentiment</span><strong>@Model.NegativeSentimentComplaints</strong></div></div>
+    <div class="rounded-[1.75rem] border border-white/60 bg-white/90 p-5 shadow-soft backdrop-blur"><div class="metric-card"><span>Escalated</span><strong>@Model.EscalatedComplaints</strong></div></div>
+</div>
+
+<div class="mb-6 grid gap-6 lg:grid-cols-2">
+    <section class="rounded-[2rem] border border-white/60 bg-white/90 p-6 shadow-soft backdrop-blur">
+        <h2 class="text-xl font-semibold tracking-tight text-slatebrand-900">Sentiment Distribution</h2>
+        <div class="mt-5 space-y-4">
+            @foreach (var item in Model.SentimentBreakdown)
+            {
+                <div>
+                    <div class="mb-2 flex items-center justify-between text-sm text-slatebrand-600">
+                        <span>@item.Label</span>
+                        <span>@item.Count (@item.Percentage%)</span>
+                    </div>
+                    <div class="h-3 overflow-hidden rounded-full bg-slatebrand-100">
+                        <div class="h-full rounded-full @ProgressClass(item.Label)" style="width: @item.Percentage%;"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="rounded-[2rem] border border-white/60 bg-white/90 p-6 shadow-soft backdrop-blur">
+        <h2 class="text-xl font-semibold tracking-tight text-slatebrand-900">Urgency Distribution</h2>
+        <div class="mt-5 space-y-4">
+            @foreach (var item in Model.UrgencyBreakdown)
+            {
+                <div>
+                    <div class="mb-2 flex items-center justify-between text-sm text-slatebrand-600">
+                        <span>@item.Label</span>
+                        <span>@item.Count (@item.Percentage%)</span>
+                    </div>
+                    <div class="h-3 overflow-hidden rounded-full bg-slatebrand-100">
+                        <div class="h-full rounded-full @ProgressClass(item.Label)" style="width: @item.Percentage%;"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+<div class="mb-6 grid gap-6 lg:grid-cols-2">
+    <section class="rounded-[2rem] border border-white/60 bg-white/90 p-6 shadow-soft backdrop-blur">
+        <h2 class="text-xl font-semibold tracking-tight text-slatebrand-900">Status Overview</h2>
+        <div class="mt-5 overflow-hidden rounded-[1.5rem] border border-slatebrand-200">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slatebrand-200 text-sm">
+                    <thead class="bg-slatebrand-100/70 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slatebrand-600">
+                        <tr>
+                            <th class="px-4 py-3">Status</th>
+                            <th class="px-4 py-3 text-right">Count</th>
+                            <th class="px-4 py-3 text-right">Share</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slatebrand-100 bg-white">
+                    @foreach (var item in Model.StatusBreakdown)
+                    {
+                        <tr>
+                            <td class="px-4 py-3 text-slatebrand-700">@item.Label</td>
+                            <td class="px-4 py-3 text-right text-slatebrand-700">@item.Count</td>
+                            <td class="px-4 py-3 text-right text-slatebrand-700">@item.Percentage%</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-[2rem] border border-white/60 bg-white/90 p-6 shadow-soft backdrop-blur">
+        <div class="flex items-center justify-between gap-4">
+            <h2 class="text-xl font-semibold tracking-tight text-slatebrand-900">Top Categories</h2>
+            <span class="text-xs font-medium uppercase tracking-[0.16em] text-slatebrand-500">By complaint volume</span>
+        </div>
+        <div class="mt-5 overflow-hidden rounded-[1.5rem] border border-slatebrand-200">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slatebrand-200 text-sm">
+                    <thead class="bg-slatebrand-100/70 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slatebrand-600">
+                        <tr>
+                            <th class="px-4 py-3">Category</th>
+                            <th class="px-4 py-3 text-right">Count</th>
+                            <th class="px-4 py-3 text-right">Share</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slatebrand-100 bg-white">
+                    @foreach (var item in Model.CategoryBreakdown.Take(6))
+                    {
+                        <tr>
+                            <td class="px-4 py-3 text-slatebrand-700">@item.Label</td>
+                            <td class="px-4 py-3 text-right text-slatebrand-700">@item.Count</td>
+                            <td class="px-4 py-3 text-right text-slatebrand-700">@item.Percentage%</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<section class="rounded-[2rem] border border-white/60 bg-white/90 p-6 shadow-soft backdrop-blur">
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-xl font-semibold tracking-tight text-slatebrand-900">Recent Complaints</h2>
+        <a asp-controller="Complaint" asp-action="Index" class="inline-flex items-center justify-center rounded-full border border-slatebrand-200 px-4 py-2 text-sm font-semibold text-slatebrand-700 transition hover:border-accent-200 hover:bg-accent-50 hover:text-accent-700">View All</a>
+    </div>
+
+    @if (!Model.RecentComplaints.Any())
+    {
+        <div class="rounded-2xl border border-dashed border-slatebrand-200 bg-slatebrand-50 px-6 py-10 text-center text-sm text-slatebrand-500">No complaints have been submitted yet.</div>
+    }
+    else
+    {
+        <div class="overflow-hidden rounded-[1.5rem] border border-slatebrand-200">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slatebrand-200 text-sm">
+                    <thead class="bg-slatebrand-100/70 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slatebrand-600">
+                        <tr>
+                            <th class="px-5 py-4">Title</th>
+                            <th class="px-5 py-4">Category</th>
+                            <th class="px-5 py-4">Status</th>
+                            <th class="px-5 py-4">Sentiment</th>
+                            <th class="px-5 py-4">Urgency</th>
+                            <th class="px-5 py-4 text-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slatebrand-100 bg-white">
+                    @foreach (var complaint in Model.RecentComplaints)
+                    {
+                        <tr>
+                            <td class="px-5 py-4 font-medium text-slatebrand-900">@complaint.Title</td>
+                            <td class="px-5 py-4 text-slatebrand-700">@complaint.Category</td>
+                            <td class="px-5 py-4 text-slatebrand-700">@complaint.Status</td>
+                            <td class="px-5 py-4 text-slatebrand-700">@complaint.Sentiment</td>
+                            <td class="px-5 py-4 text-slatebrand-700">@complaint.Urgency</td>
+                            <td class="px-5 py-4 text-right">
+                                <a asp-controller="Complaint" asp-action="Details" asp-route-id="@complaint.Id" class="inline-flex items-center justify-center rounded-full border border-slatebrand-200 px-4 py-2 text-xs font-semibold text-slatebrand-700 transition hover:border-accent-200 hover:bg-accent-50 hover:text-accent-700">Open</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</section>

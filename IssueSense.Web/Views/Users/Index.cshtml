@@ -1,0 +1,112 @@
+@model IssueSense.Web.Models.Users.UserManagementPageViewModel
+@using IssueSense.Domain.Common
+
+@{
+    ViewData["Title"] = "Manage Users";
+
+    static string RolePillClass(string role) => role switch
+    {
+        RoleNames.SupportAdmin => "bg-slatebrand-900 text-white",
+        RoleNames.Analyst => "bg-slatebrand-100 text-slatebrand-700",
+        RoleNames.TriageOfficer => "bg-amber-100 text-amber-800",
+        RoleNames.CaseManager => "bg-sky-100 text-sky-800",
+        RoleNames.AiReviewer => "bg-emerald-100 text-emerald-800",
+        _ => "bg-slate-100 text-slate-700"
+    };
+}
+
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <h1 class="text-3xl font-semibold tracking-tight text-slatebrand-900">Manage Users</h1>
+        <p class="mt-2 text-sm text-slatebrand-600">Internal account administration for operational roles. Public sign-up is intentionally disabled.</p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">@successMessage</div>
+}
+
+<div class="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_24rem]">
+    <section class="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-soft backdrop-blur sm:p-8">
+        <div class="flex flex-col gap-3 border-b border-slatebrand-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-xl font-semibold tracking-tight text-slatebrand-900">Current Accounts</h2>
+                <p class="mt-2 text-sm text-slatebrand-600">All internal users with role-based access to the complaint system.</p>
+            </div>
+            <span class="text-sm text-slatebrand-500">@Model.Users.Count user(s)</span>
+        </div>
+
+        <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-slatebrand-200">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slatebrand-200 text-sm">
+                    <thead class="bg-slatebrand-100/70 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slatebrand-600">
+                        <tr>
+                            <th class="px-5 py-4">Display Name</th>
+                            <th class="px-5 py-4">Username</th>
+                            <th class="px-5 py-4">Role</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slatebrand-100 bg-white">
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td class="px-5 py-4 font-medium text-slatebrand-900">@user.DisplayName</td>
+                            <td class="px-5 py-4 text-slatebrand-700">@user.UserName</td>
+                            <td class="px-5 py-4">
+                                <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold @RolePillClass(user.Role)">@user.Role</span>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <aside class="rounded-[2rem] border border-slatebrand-200 bg-slatebrand-900 p-6 text-slatebrand-50 shadow-soft sm:p-8">
+        <h2 class="text-xl font-semibold tracking-tight text-white">Create Internal User</h2>
+        <p class="mt-2 text-sm leading-6 text-slatebrand-300">Use this form to provision operational accounts for staff. Passwords are stored using PBKDF2 hashing.</p>
+
+        <form asp-action="Create" method="post" class="mt-6 space-y-4">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="rounded-2xl border border-rose-200/50 bg-rose-100/10 px-4 py-3 text-sm text-rose-100"></div>
+
+            <div>
+                <label asp-for="NewUser.UserName" class="mb-2 block text-sm font-medium text-slatebrand-100"></label>
+                <input asp-for="NewUser.UserName" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20" />
+                <span asp-validation-for="NewUser.UserName" class="mt-2 block text-sm text-rose-200"></span>
+            </div>
+
+            <div>
+                <label asp-for="NewUser.DisplayName" class="mb-2 block text-sm font-medium text-slatebrand-100"></label>
+                <input asp-for="NewUser.DisplayName" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20" />
+                <span asp-validation-for="NewUser.DisplayName" class="mt-2 block text-sm text-rose-200"></span>
+            </div>
+
+            <div>
+                <label asp-for="NewUser.Password" class="mb-2 block text-sm font-medium text-slatebrand-100"></label>
+                <input asp-for="NewUser.Password" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20" />
+                <span asp-validation-for="NewUser.Password" class="mt-2 block text-sm text-rose-200"></span>
+            </div>
+
+            <div>
+                <label asp-for="NewUser.Role" class="mb-2 block text-sm font-medium text-slatebrand-100"></label>
+                <select asp-for="NewUser.Role" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20">
+                    <option value="@RoleNames.SupportAdmin">@RoleNames.SupportAdmin</option>
+                    <option value="@RoleNames.Analyst">@RoleNames.Analyst</option>
+                    <option value="@RoleNames.TriageOfficer">@RoleNames.TriageOfficer</option>
+                    <option value="@RoleNames.CaseManager">@RoleNames.CaseManager</option>
+                    <option value="@RoleNames.AiReviewer">@RoleNames.AiReviewer</option>
+                </select>
+                <span asp-validation-for="NewUser.Role" class="mt-2 block text-sm text-rose-200"></span>
+            </div>
+
+            <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-accent-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-500/20 transition hover:bg-accent-600">Create User</button>
+        </form>
+    </aside>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

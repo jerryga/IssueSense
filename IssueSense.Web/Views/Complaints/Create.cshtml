@@ -1,0 +1,73 @@
+@model IssueSense.Web.Models.Complaints.ComplaintCreateViewModel
+
+@{
+    ViewData["Title"] = "Create Complaint";
+}
+
+<div class="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(20rem,1fr)]">
+    <section class="rounded-[2rem] border border-white/60 bg-white/90 p-8 shadow-soft backdrop-blur">
+        <h1 class="text-3xl font-semibold tracking-tight text-slatebrand-900">Create Complaint</h1>
+        <p class="mt-3 text-sm leading-6 text-slatebrand-600">Complaint text is automatically analyzed for sentiment, category, urgency, and follow-up actions.</p>
+
+        <form asp-action="Create" method="post" class="mt-8 space-y-6">
+            <div asp-validation-summary="ModelOnly" class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
+
+            <div>
+                <label asp-for="Title" class="mb-2 block text-sm font-medium text-slatebrand-800"></label>
+                <input asp-for="Title" class="w-full rounded-2xl border border-slatebrand-200 bg-white px-4 py-3 text-slatebrand-900 shadow-sm outline-none transition focus:border-accent-500 focus:ring-4 focus:ring-accent-100" />
+                <span asp-validation-for="Title" class="mt-2 block text-sm text-red-600"></span>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2">
+                <div>
+                    <label asp-for="CustomerName" class="mb-2 block text-sm font-medium text-slatebrand-800"></label>
+                    <input asp-for="CustomerName" class="w-full rounded-2xl border border-slatebrand-200 bg-white px-4 py-3 text-slatebrand-900 shadow-sm outline-none transition focus:border-accent-500 focus:ring-4 focus:ring-accent-100" />
+                    <span asp-validation-for="CustomerName" class="mt-2 block text-sm text-red-600"></span>
+                </div>
+                <div>
+                    <label asp-for="CustomerEmail" class="mb-2 block text-sm font-medium text-slatebrand-800"></label>
+                    <input asp-for="CustomerEmail" class="w-full rounded-2xl border border-slatebrand-200 bg-white px-4 py-3 text-slatebrand-900 shadow-sm outline-none transition focus:border-accent-500 focus:ring-4 focus:ring-accent-100" />
+                    <span asp-validation-for="CustomerEmail" class="mt-2 block text-sm text-red-600"></span>
+                </div>
+            </div>
+
+            <div>
+                <label asp-for="Description" class="mb-2 block text-sm font-medium text-slatebrand-800"></label>
+                <textarea asp-for="Description" rows="8" class="w-full rounded-[1.5rem] border border-slatebrand-200 bg-white px-4 py-3 text-slatebrand-900 shadow-sm outline-none transition focus:border-accent-500 focus:ring-4 focus:ring-accent-100"></textarea>
+                <span asp-validation-for="Description" class="mt-2 block text-sm text-red-600"></span>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-accent-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-500/20 transition hover:bg-accent-600">Submit Complaint</button>
+                <a asp-action="Index" class="inline-flex items-center justify-center rounded-2xl border border-slatebrand-200 bg-white px-5 py-3 text-sm font-semibold text-slatebrand-700 transition hover:border-slatebrand-300 hover:bg-slatebrand-50">Cancel</a>
+            </div>
+        </form>
+    </section>
+
+    <aside class="rounded-[2rem] border border-slatebrand-200 bg-slatebrand-900 p-8 text-slatebrand-50 shadow-soft">
+        <h2 class="text-lg font-semibold tracking-tight">Analysis Preview</h2>
+        <p class="mt-3 text-sm leading-6 text-slatebrand-200">When you submit a complaint, the AI analysis service will classify the text and suggest who should act next.</p>
+        <div class="mt-6 space-y-3">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div class="text-xs uppercase tracking-[0.18em] text-slatebrand-300">Sentiment</div>
+                <div class="mt-2 text-base font-semibold text-white">Positive / Neutral / Negative</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div class="text-xs uppercase tracking-[0.18em] text-slatebrand-300">Category</div>
+                <div class="mt-2 text-base font-semibold text-white">Billing / Technical / Delivery / Service</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div class="text-xs uppercase tracking-[0.18em] text-slatebrand-300">Urgency</div>
+                <div class="mt-2 text-base font-semibold text-white">Low / Medium / High</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div class="text-xs uppercase tracking-[0.18em] text-slatebrand-300">Action Guidance</div>
+                <div class="mt-2 text-base font-semibold text-white">&#64;triage_officer / &#64;case_manager / &#64;support_admin</div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
