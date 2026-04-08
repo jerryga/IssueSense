@@ -242,7 +242,7 @@
             <div class="mt-6 space-y-6">
                 @if (User.IsInRole(RoleNames.SupportAdmin) || User.IsInRole(RoleNames.CaseManager) || User.IsInRole(RoleNames.AiReviewer))
                 {
-                    <form asp-action="Reanalyze" method="post">
+                    <form asp-action="Reanalyze" method="post" data-ai-loading="true" data-ai-loading-title="Re-analyzing Complaint" data-ai-loading-message="The AI is refreshing sentiment, urgency, confidence, and suggested action items for this case.">
                         @Html.AntiForgeryToken()
                         <input name="complaintId" value="@Model.Complaint.Id" type="hidden" />
                         <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-accent-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-500/20 transition hover:bg-accent-600">Re-analyze Complaint</button>

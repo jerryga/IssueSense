@@ -91,6 +91,28 @@
         @RenderBody()
     </main>
 
+    <div id="ai-loading-overlay" class="pointer-events-none fixed inset-0 z-50 hidden items-center justify-center bg-slatebrand-900/40 px-4 backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-[1.75rem] border border-white/70 bg-white/95 p-6 text-center shadow-soft">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent-50">
+                <div class="h-7 w-7 animate-spin rounded-full border-[3px] border-accent-200 border-t-accent-600"></div>
+            </div>
+            <h2 id="ai-loading-title" class="mt-5 text-xl font-semibold tracking-tight text-slatebrand-900">Analyzing Complaint</h2>
+            <p id="ai-loading-message" class="mt-3 text-sm leading-6 text-slatebrand-600">The AI model is reviewing the complaint and generating sentiment, urgency, and action guidance.</p>
+        </div>
+    </div>
+
+    <div id="ai-loading-toast" class="pointer-events-none fixed right-4 top-4 z-50 hidden max-w-sm rounded-2xl border border-accent-200 bg-white/95 px-4 py-4 shadow-soft ring-1 ring-accent-100 backdrop-blur">
+        <div class="flex items-start gap-3">
+            <div class="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-accent-50">
+                <div class="h-4 w-4 animate-spin rounded-full border-2 border-accent-200 border-t-accent-600"></div>
+            </div>
+            <div>
+                <p id="ai-loading-toast-title" class="text-sm font-semibold text-slatebrand-900">AI analysis in progress</p>
+                <p id="ai-loading-toast-message" class="mt-1 text-sm leading-6 text-slatebrand-600">Please wait while the system processes the complaint.</p>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

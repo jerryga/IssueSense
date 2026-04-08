@@ -9,7 +9,7 @@
         <h1 class="text-3xl font-semibold tracking-tight text-slatebrand-900">Create Complaint</h1>
         <p class="mt-3 text-sm leading-6 text-slatebrand-600">Complaint text is automatically analyzed for sentiment, category, urgency, and follow-up actions.</p>
 
-        <form asp-action="Create" method="post" class="mt-8 space-y-6">
+        <form asp-action="Create" method="post" class="mt-8 space-y-6" data-ai-loading="true" data-ai-loading-title="Analyzing Complaint" data-ai-loading-message="The AI is classifying sentiment, urgency, category, and suggested action items.">
             <div asp-validation-summary="ModelOnly" class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
 
             <div>

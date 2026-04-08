@@ -37,6 +37,17 @@ Run the test suite with:
 dotnet test IssueSense.slnx -p:UseSharedCompilation=false -maxcpucount:1 -nr:false
 ```
 
+To generate a `.trx` report and code coverage output:
+
+```bash
+chmod +x test-report.sh
+./test-report.sh
+```
+
+Report script:
+
+- [test-report.sh](/Users/chason/Documents/GitHub/IssueSense/test-report.sh)
+
 Current coverage includes:
 
 - `ComplaintService` unit tests for complaint creation and manual re-analysis
@@ -63,6 +74,30 @@ This repo includes:
 
 - [Dockerfile](/Users/chason/Documents/GitHub/IssueSense/Dockerfile)
 - [.dockerignore](/Users/chason/Documents/GitHub/IssueSense/.dockerignore)
+- [deploy-cloud-run.sh](/Users/chason/Documents/GitHub/IssueSense/deploy-cloud-run.sh)
+
+Quick deploy script usage:
+
+```bash
+chmod +x deploy-cloud-run.sh
+
+MONGODB_CONNECTION_STRING='YOUR_MONGODB_CONNECTION_STRING' \
+OPENAI_API_KEY='YOUR_OPENAI_API_KEY' \
+./deploy-cloud-run.sh
+```
+
+If you do not pass `MONGODB_CONNECTION_STRING`, the script will prompt for it interactively.
+
+If the `OPENAI_API_KEY` secret already exists in Google Secret Manager, you do not need to pass `OPENAI_API_KEY` again. The script will reuse the existing secret.
+
+Optional overrides:
+
+- `PROJECT_ID`
+- `REGION`
+- `SERVICE_NAME`
+- `ENABLE_OPENAI`
+- `SEED_DATA`
+- `ALLOW_UNAUTHENTICATED`
 
 Typical Google Cloud Run deployment flow:
 
