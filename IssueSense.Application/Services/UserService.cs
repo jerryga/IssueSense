@@ -10,33 +10,86 @@ namespace IssueSense.Application.Services;
 
 public sealed class UserService(IUserRepository userRepository) : IUserService
 {
-    public async Task<AuthUserDto?> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken = default)
+    private const int MaxFailedLoginAttempts = 5;
+    private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
+
+    public async Task<LoginResultDto> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken = default)
     {
         var normalizedUserName = request.UserName.Trim().ToLowerInvariant();
         var user = await userRepository.GetByUserNameAsync(normalizedUserName, cancellationToken);
         if (user is null)
         {
-            return null;
+            return new LoginResultDto
+            {
+                Success = false,
+                ErrorMessage = "Invalid username or password."
+            };
+        }
+
+        if (!user.IsActive)
+        {
+            return new LoginResultDto
+            {
+                Success = false,
+                ErrorMessage = "Your account is inactive. Please contact support."
+            };
+        }
+
+        if (user.LockoutEndUtc.HasValue && user.LockoutEndUtc.Value > DateTime.UtcNow)
+        {
+            return new LoginResultDto
+            {
+                Success = false,
+                ErrorMessage = $"Too many failed login attempts. Try again after {user.LockoutEndUtc.Value.ToLocalTime():g}.",
+                LockoutEndUtc = user.LockoutEndUtc
+            };
         }
 
         var verificationResult = PasswordSecurity.VerifyPassword(request.Password, user.PasswordHash);
         if (verificationResult == PasswordVerificationResult.Failed)
         {
-            return null;
+            user.FailedLoginCount += 1;
+            if (user.FailedLoginCount >= MaxFailedLoginAttempts)
+            {
+                user.LockoutEndUtc = DateTime.UtcNow.Add(LockoutDuration);
+            }
+
+            await userRepository.UpdateAsync(user, cancellationToken);
+
+            return new LoginResultDto
+            {
+                Success = false,
+                ErrorMessage = user.LockoutEndUtc.HasValue && user.LockoutEndUtc.Value > DateTime.UtcNow
+                    ? $"Too many failed login attempts. Try again after {user.LockoutEndUtc.Value.ToLocalTime():g}."
+                    : "Invalid username or password.",
+                LockoutEndUtc = user.LockoutEndUtc
+            };
         }
+
+        user.FailedLoginCount = 0;
+        user.LockoutEndUtc = null;
+        user.LastLoginAtUtc = DateTime.UtcNow;
 
         if (verificationResult == PasswordVerificationResult.SuccessRehashNeeded)
         {
             user.PasswordHash = PasswordSecurity.HashPassword(request.Password);
             await userRepository.UpdateAsync(user, cancellationToken);
         }
-
-        return new AuthUserDto
+        else
         {
-            Id = user.Id,
-            UserName = user.UserName,
-            DisplayName = user.DisplayName,
-            Role = user.Role
+            await userRepository.UpdateAsync(user, cancellationToken);
+        }
+
+        return new LoginResultDto
+        {
+            Success = true,
+            User = new AuthUserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                DisplayName = user.DisplayName,
+                Role = user.Role
+            }
         };
     }
 
@@ -78,7 +131,9 @@ public sealed class UserService(IUserRepository userRepository) : IUserService
             UserName = normalizedUserName,
             DisplayName = request.DisplayName.Trim(),
             PasswordHash = PasswordSecurity.HashPassword(request.Password),
-            Role = request.Role.Trim()
+            Role = request.Role.Trim(),
+            IsActive = true,
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         await userRepository.InsertAsync(user, cancellationToken);
@@ -94,35 +149,45 @@ public sealed class UserService(IUserRepository userRepository) : IUserService
                 UserName = "admin",
                 DisplayName = "Support Admin",
                 PasswordHash = PasswordSecurity.HashPassword("Admin@123"),
-                Role = RoleNames.SupportAdmin
+                Role = RoleNames.SupportAdmin,
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
             },
             new UserAccount
             {
                 UserName = "analyst",
                 DisplayName = "Complaint Analyst",
                 PasswordHash = PasswordSecurity.HashPassword("Analyst@123"),
-                Role = RoleNames.Analyst
+                Role = RoleNames.Analyst,
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
             },
             new UserAccount
             {
                 UserName = "triage",
                 DisplayName = "Triage Officer",
                 PasswordHash = PasswordSecurity.HashPassword("Triage@123"),
-                Role = RoleNames.TriageOfficer
+                Role = RoleNames.TriageOfficer,
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
             },
             new UserAccount
             {
                 UserName = "casemanager",
                 DisplayName = "Case Manager",
                 PasswordHash = PasswordSecurity.HashPassword("Case@123"),
-                Role = RoleNames.CaseManager
+                Role = RoleNames.CaseManager,
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
             },
             new UserAccount
             {
                 UserName = "aireviewer",
                 DisplayName = "AI Reviewer",
                 PasswordHash = PasswordSecurity.HashPassword("Review@123"),
-                Role = RoleNames.AiReviewer
+                Role = RoleNames.AiReviewer,
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
             }
         };
 

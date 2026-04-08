@@ -20,4 +20,21 @@ public sealed class UserDocument
 
     [BsonElement("displayName")]
     public string DisplayName { get; set; } = string.Empty;
+
+    [BsonElement("isActive")]
+    public bool IsActive { get; set; } = true;
+
+    [BsonElement("createdAtUtc")]
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    [BsonElement("lastLoginAtUtc")]
+    [BsonIgnoreIfNull]
+    public DateTime? LastLoginAtUtc { get; set; }
+
+    [BsonElement("failedLoginCount")]
+    public int FailedLoginCount { get; set; }
+
+    [BsonElement("lockoutEndUtc")]
+    [BsonIgnoreIfNull]
+    public DateTime? LockoutEndUtc { get; set; }
 }

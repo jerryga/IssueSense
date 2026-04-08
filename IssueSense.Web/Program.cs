@@ -8,6 +8,7 @@ using IssueSense.Infrastructure.Services;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,38 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllersWithViews();
+builder.Services.AddHealthChecks();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = (context, cancellationToken) =>
+    {
+        context.HttpContext.RequestServices
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("LoginRateLimiter")
+            .LogWarning(
+                "Request rejected by rate limiter. Path: {Path}. RemoteIp: {RemoteIp}",
+                context.HttpContext.Request.Path,
+                context.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+
+        context.HttpContext.Response.ContentType = "text/plain";
+        return new ValueTask(context.HttpContext.Response.WriteAsync("Too many login attempts. Please try again later.", cancellationToken));
+    };
+    options.AddPolicy("login", httpContext =>
+    {
+        var partitionKey = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey,
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            });
+    });
+});
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -125,12 +158,14 @@ app.UseCookiePolicy(new CookiePolicyOptions
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Dashboard}/{action=Index}/{id?}");
+app.MapHealthChecks("/health");
 
 app.Run();
 

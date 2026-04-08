@@ -6,10 +6,14 @@ using IssueSense.Application.DTOs.Complaints;
 using IssueSense.Application.Interfaces.Services;
 using IssueSense.Domain.Enums;
 using IssueSense.Infrastructure.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace IssueSense.Infrastructure.Services;
 
-public sealed class AIAnalysisService(HttpClient httpClient, OpenAISettings settings) : IAIAnalysisService
+public sealed class AIAnalysisService(
+    HttpClient httpClient,
+    OpenAISettings settings,
+    ILogger<AIAnalysisService> logger) : IAIAnalysisService
 {
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
     {
@@ -31,21 +35,31 @@ public sealed class AIAnalysisService(HttpClient httpClient, OpenAISettings sett
     {
         if (!settings.Enabled || string.IsNullOrWhiteSpace(settings.ApiKey))
         {
+            logger.LogInformation("AI analysis used mock classifier because OpenAI is disabled or no API key is configured.");
             return AnalyzeWithMockRules(complaintText);
         }
 
         try
         {
             var aiResult = await AnalyzeWithOpenAiAsync(complaintText, cancellationToken);
-            return aiResult ?? AnalyzeWithMockRules(complaintText);
+            if (aiResult is not null)
+            {
+                logger.LogInformation("AI analysis completed using OpenAI model {Model}.", settings.Model);
+                return aiResult;
+            }
+
+            logger.LogWarning("OpenAI returned no structured analysis. Falling back to mock classifier.");
+            return AnalyzeWithMockRules(complaintText);
         }
-        catch
+        catch (Exception ex)
         {
             if (!settings.UseMockFallback)
             {
+                logger.LogError(ex, "OpenAI analysis failed and mock fallback is disabled.");
                 throw;
             }
 
+            logger.LogWarning(ex, "OpenAI analysis failed. Falling back to mock classifier.");
             return AnalyzeWithMockRules(complaintText);
         }
     }
@@ -133,12 +147,16 @@ public sealed class AIAnalysisService(HttpClient httpClient, OpenAISettings sett
 
         if (string.IsNullOrWhiteSpace(rawJson))
         {
+            logger.LogWarning("OpenAI response did not contain output_text content.");
             return null;
         }
+
+        logger.LogInformation("OpenAI raw complaint analysis response: {RawJson}", rawJson);
 
         var result = JsonSerializer.Deserialize<OpenAIComplaintAnalysisResult>(rawJson, SerializerOptions);
         if (result is null)
         {
+            logger.LogWarning("OpenAI raw response could not be deserialized into the expected schema.");
             return null;
         }
 

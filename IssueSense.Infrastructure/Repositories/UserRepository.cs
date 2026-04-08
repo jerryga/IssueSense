@@ -59,7 +59,12 @@ public sealed class UserRepository(MongoDbContext context) : IUserRepository
             UserName = user.UserName.Trim().ToLowerInvariant(),
             PasswordHash = user.PasswordHash,
             Role = user.Role,
-            DisplayName = user.DisplayName
+            DisplayName = user.DisplayName,
+            IsActive = user.IsActive,
+            CreatedAtUtc = user.CreatedAtUtc,
+            LastLoginAtUtc = user.LastLoginAtUtc,
+            FailedLoginCount = user.FailedLoginCount,
+            LockoutEndUtc = user.LockoutEndUtc
         };
 
     private static UserAccount MapUser(UserDocument document) =>
@@ -69,6 +74,11 @@ public sealed class UserRepository(MongoDbContext context) : IUserRepository
             UserName = document.UserName,
             PasswordHash = document.PasswordHash,
             Role = document.Role,
-            DisplayName = document.DisplayName
+            DisplayName = document.DisplayName,
+            IsActive = document.IsActive,
+            CreatedAtUtc = document.CreatedAtUtc,
+            LastLoginAtUtc = document.LastLoginAtUtc,
+            FailedLoginCount = document.FailedLoginCount,
+            LockoutEndUtc = document.LockoutEndUtc
         };
 }

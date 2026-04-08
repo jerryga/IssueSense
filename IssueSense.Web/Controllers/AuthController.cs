@@ -6,10 +6,13 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace IssueSense.Web.Controllers;
 
-public sealed class AuthController(IUserService userService) : Controller
+public sealed class AuthController(
+    IUserService userService,
+    ILogger<AuthController> logger) : Controller
 {
     [HttpGet]
     [AllowAnonymous]
@@ -26,6 +29,7 @@ public sealed class AuthController(IUserService userService) : Controller
 
     [HttpPost]
     [AllowAnonymous]
+    [EnableRateLimiting("login")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null, CancellationToken cancellationToken = default)
     {
@@ -35,18 +39,24 @@ public sealed class AuthController(IUserService userService) : Controller
             return View("~/Views/Account/Login.cshtml", model);
         }
 
-        var user = await userService.LoginAsync(new LoginRequestDto
+        var result = await userService.LoginAsync(new LoginRequestDto
         {
             UserName = model.UserName,
             Password = model.Password
         }, cancellationToken);
 
-        if (user is null)
+        if (!result.Success || result.User is null)
         {
-            ModelState.AddModelError(string.Empty, "Invalid username or password.");
+            logger.LogWarning(
+                "Interactive login rejected for user {UserName}. Reason: {Reason}",
+                model.UserName.Trim(),
+                result.ErrorMessage ?? "Unknown");
+            ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Invalid username or password.");
             ViewData["ReturnUrl"] = returnUrl;
             return View("~/Views/Account/Login.cshtml", model);
         }
+
+        var user = result.User;
 
         var claims = new List<Claim>
         {
@@ -58,6 +68,7 @@ public sealed class AuthController(IUserService userService) : Controller
 
         var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+        logger.LogInformation("Interactive login succeeded for user {UserName}.", user.UserName);
 
         if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
@@ -73,6 +84,7 @@ public sealed class AuthController(IUserService userService) : Controller
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        logger.LogInformation("User {UserName} logged out.", User.Identity?.Name ?? "unknown");
         return RedirectToAction(nameof(Login));
     }
 }

@@ -1,10 +1,12 @@
 @model IssueSense.Web.Models.Auth.LoginViewModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment WebHostEnvironment
 
 @{
     ViewData["Title"] = "Login";
+    var showDemoAccounts = !WebHostEnvironment.IsProduction();
 }
 
-<div class="mx-auto mt-10 grid max-w-5xl gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+<div class="mx-auto mt-10 @(showDemoAccounts ? "grid max-w-5xl gap-8 lg:grid-cols-[1.15fr_0.85fr]" : "max-w-2xl")">
     <section class="rounded-[2rem] border border-white/60 bg-white/90 p-8 shadow-soft backdrop-blur">
         <div class="mb-8">
             <span class="inline-flex rounded-full border border-accent-200 bg-accent-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-accent-700">Operational Access</span>
@@ -31,34 +33,37 @@
         </form>
     </section>
 
-    <aside class="overflow-hidden rounded-[2rem] border border-slatebrand-200 bg-slatebrand-900 text-slatebrand-50 shadow-soft">
-        <div class="border-b border-white/10 px-8 py-6">
-            <h2 class="text-lg font-semibold tracking-tight">Demo Role Accounts</h2>
-            <p class="mt-2 text-sm leading-6 text-slatebrand-200">Each role opens a different slice of the workflow so you can validate RBAC and the complaint lifecycle end to end.</p>
-        </div>
-        <div class="space-y-4 px-8 py-6 text-sm">
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div class="font-semibold text-white">Support Admin</div>
-                <div class="mt-1 text-slatebrand-200">admin / Admin@123</div>
+    @if (showDemoAccounts)
+    {
+        <aside class="overflow-hidden rounded-[2rem] border border-slatebrand-200 bg-slatebrand-900 text-slatebrand-50 shadow-soft">
+            <div class="border-b border-white/10 px-8 py-6">
+                <h2 class="text-lg font-semibold tracking-tight">Demo Role Accounts</h2>
+                <p class="mt-2 text-sm leading-6 text-slatebrand-200">Each role opens a different slice of the workflow so you can validate RBAC and the complaint lifecycle end to end.</p>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div class="font-semibold text-white">Analyst</div>
-                <div class="mt-1 text-slatebrand-200">analyst / Analyst@123</div>
+            <div class="space-y-4 px-8 py-6 text-sm">
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div class="font-semibold text-white">Support Admin</div>
+                    <div class="mt-1 text-slatebrand-200">admin / Admin@123</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div class="font-semibold text-white">Analyst</div>
+                    <div class="mt-1 text-slatebrand-200">analyst / Analyst@123</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div class="font-semibold text-white">Triage Officer</div>
+                    <div class="mt-1 text-slatebrand-200">triage / Triage@123</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div class="font-semibold text-white">Case Manager</div>
+                    <div class="mt-1 text-slatebrand-200">casemanager / Case@123</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div class="font-semibold text-white">AI Reviewer</div>
+                    <div class="mt-1 text-slatebrand-200">aireviewer / Review@123</div>
+                </div>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div class="font-semibold text-white">Triage Officer</div>
-                <div class="mt-1 text-slatebrand-200">triage / Triage@123</div>
-            </div>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div class="font-semibold text-white">Case Manager</div>
-                <div class="mt-1 text-slatebrand-200">casemanager / Case@123</div>
-            </div>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div class="font-semibold text-white">AI Reviewer</div>
-                <div class="mt-1 text-slatebrand-200">aireviewer / Review@123</div>
-            </div>
-        </div>
-    </aside>
+        </aside>
+    }
 </div>
 
 @section Scripts {

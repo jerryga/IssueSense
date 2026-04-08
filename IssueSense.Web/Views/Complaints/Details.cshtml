@@ -189,8 +189,9 @@
             @if (User.IsInRole(RoleNames.SupportAdmin) || User.IsInRole(RoleNames.TriageOfficer) || User.IsInRole(RoleNames.CaseManager) || User.IsInRole(RoleNames.AiReviewer))
             {
                 <form asp-action="AddComment" method="post" class="mb-6 space-y-3">
-                    <input asp-for="NewComment.ComplaintId" type="hidden" />
-                    <textarea asp-for="NewComment.Message" rows="4" class="w-full rounded-[1.5rem] border border-slatebrand-200 bg-white px-4 py-3 text-slatebrand-900 shadow-sm outline-none transition focus:border-accent-500 focus:ring-4 focus:ring-accent-100" placeholder="Write a case note, triage note, or AI review comment..."></textarea>
+                    @Html.AntiForgeryToken()
+                    <input name="ComplaintId" value="@Model.Complaint.Id" type="hidden" />
+                    <textarea name="Message" rows="4" class="w-full rounded-[1.5rem] border border-slatebrand-200 bg-white px-4 py-3 text-slatebrand-900 shadow-sm outline-none transition focus:border-accent-500 focus:ring-4 focus:ring-accent-100" placeholder="Write a case note, triage note, or AI review comment...">@Model.NewComment.Message</textarea>
                     <div class="flex items-start justify-between gap-4">
                         <span asp-validation-for="NewComment.Message" class="block text-sm text-red-600"></span>
                         <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-accent-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-accent-500/20 transition hover:bg-accent-600">Post Comment</button>
@@ -259,15 +260,16 @@
                 @if (User.IsInRole(RoleNames.SupportAdmin) || User.IsInRole(RoleNames.CaseManager) || User.IsInRole(RoleNames.TriageOfficer))
                 {
                     <form asp-action="UpdateAssignment" method="post" class="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
-                        <input asp-for="AssignmentUpdate.ComplaintId" type="hidden" />
+                        @Html.AntiForgeryToken()
+                        <input name="ComplaintId" value="@Model.Complaint.Id" type="hidden" />
                         <div>
                             <label asp-for="AssignmentUpdate.AssignedOwner" class="mb-2 block text-sm font-medium text-slatebrand-100">Assign Owner</label>
-                            <select asp-for="AssignmentUpdate.AssignedOwner" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20">
+                            <select name="AssignedOwner" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20">
                                 <option value="">Unassigned</option>
-                                <option value="@RoleNames.TriageOfficer">@RoleNames.TriageOfficer</option>
-                                <option value="@RoleNames.CaseManager">@RoleNames.CaseManager</option>
-                                <option value="@RoleNames.SupportAdmin">@RoleNames.SupportAdmin</option>
-                                <option value="@RoleNames.AiReviewer">@RoleNames.AiReviewer</option>
+                                <option value="@RoleNames.TriageOfficer" selected="@(Model.AssignmentUpdate.AssignedOwner == RoleNames.TriageOfficer)">@RoleNames.TriageOfficer</option>
+                                <option value="@RoleNames.CaseManager" selected="@(Model.AssignmentUpdate.AssignedOwner == RoleNames.CaseManager)">@RoleNames.CaseManager</option>
+                                <option value="@RoleNames.SupportAdmin" selected="@(Model.AssignmentUpdate.AssignedOwner == RoleNames.SupportAdmin)">@RoleNames.SupportAdmin</option>
+                                <option value="@RoleNames.AiReviewer" selected="@(Model.AssignmentUpdate.AssignedOwner == RoleNames.AiReviewer)">@RoleNames.AiReviewer</option>
                             </select>
                         </div>
                         <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">Save Assignment</button>
@@ -277,10 +279,11 @@
                 @if (User.IsInRole(RoleNames.SupportAdmin) || User.IsInRole(RoleNames.CaseManager) || User.IsInRole(RoleNames.TriageOfficer))
                 {
                     <form asp-action="UpdateStatus" method="post" class="space-y-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
-                        <input asp-for="StatusUpdate.ComplaintId" type="hidden" />
+                        @Html.AntiForgeryToken()
+                        <input name="ComplaintId" value="@Model.Complaint.Id" type="hidden" />
                         <div>
                             <label asp-for="StatusUpdate.Status" class="mb-2 block text-sm font-medium text-slatebrand-100">Update Status</label>
-                            <select asp-for="StatusUpdate.Status" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20" asp-items="Html.GetEnumSelectList<IssueSense.Domain.Enums.ComplaintStatus>()"></select>
+                            <select name="Status" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20" asp-items="Html.GetEnumSelectList<IssueSense.Domain.Enums.ComplaintStatus>()"></select>
                         </div>
                         <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">Save Status</button>
                     </form>

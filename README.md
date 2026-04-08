@@ -56,3 +56,46 @@ Configure these settings in `IssueSense.Web/appsettings.json` or environment var
 If OpenAI is disabled or the API call fails, the app falls back to the built-in mock classifier when `OpenAI__UseMockFallback=true`.
 
 Keep secrets out of source control and prefer environment variables for `OpenAI__ApiKey`.
+
+## Cloud Run Deployment
+
+This repo includes:
+
+- [Dockerfile](/Users/chason/Documents/GitHub/IssueSense/Dockerfile)
+- [.dockerignore](/Users/chason/Documents/GitHub/IssueSense/.dockerignore)
+
+Typical Google Cloud Run deployment flow:
+
+```bash
+gcloud config set project YOUR_PROJECT_ID
+
+gcloud run deploy issuesense \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --set-env-vars ASPNETCORE_ENVIRONMENT=Production,SeedData=false,OpenAI__Enabled=false,MongoDb__DatabaseName=IssueSenseDb,MongoDb__ComplaintsCollectionName=complaints,MongoDb__UsersCollectionName=users \
+  --set-secrets OpenAI__ApiKey=OPENAI_API_KEY:latest
+```
+
+Also set your MongoDB connection string in Cloud Run:
+
+```bash
+gcloud run services update issuesense \
+  --region us-central1 \
+  --update-env-vars MongoDb__ConnectionString='YOUR_MONGODB_CONNECTION_STRING'
+```
+
+Recommended production values:
+
+- `ASPNETCORE_ENVIRONMENT=Production`
+- `SeedData=false`
+- `OpenAI__Enabled=true` or `false`
+- `OpenAI__Model=gpt-5.4-nano`
+- `OpenAI__UseMockFallback=true`
+
+After deployment, verify:
+
+- `/health`
+- login page loads
+- MongoDB connection works
+- complaint list page loads
