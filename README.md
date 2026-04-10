@@ -48,6 +48,10 @@ Report script:
 
 - [test-report.sh](/Users/chason/Documents/GitHub/IssueSense/test-report.sh)
 
+The script also generates an HTML coverage report that you can open in a browser:
+
+- `TestResults/coverage-report-<timestamp>/index.html`
+
 Current coverage includes:
 
 - `ComplaintService` unit tests for complaint creation and manual re-analysis
