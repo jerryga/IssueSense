@@ -18,6 +18,7 @@ public static class ClaimsPrincipalExtensions
         principal.GetRoleName() switch
         {
             RoleNames.SupportAdmin => "Support Admin",
+            RoleNames.UserAdmin => "User Admin",
             RoleNames.Analyst => "Analyst",
             RoleNames.TriageOfficer => "Triage Officer",
             RoleNames.CaseManager => "Case Manager",

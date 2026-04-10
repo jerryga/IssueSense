@@ -171,7 +171,7 @@ public sealed class ComplaintController(IComplaintService complaintService) : Co
     }
 
     [HttpPost]
-    [Authorize(Roles = RoleNames.SupportAdmin)]
+    [Authorize(Roles = RoleNames.ArchiveManagers)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Archive(string complaintId, CancellationToken cancellationToken)
     {

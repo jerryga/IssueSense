@@ -146,6 +146,15 @@ public sealed class UserService(IUserRepository userRepository) : IUserService
         {
             new UserAccount
             {
+                UserName = "useradmin",
+                DisplayName = "User Administrator",
+                PasswordHash = PasswordSecurity.HashPassword("User@123"),
+                Role = RoleNames.UserAdmin,
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
+            },
+            new UserAccount
+            {
                 UserName = "admin",
                 DisplayName = "Support Admin",
                 PasswordHash = PasswordSecurity.HashPassword("Admin@123"),

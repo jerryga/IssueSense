@@ -23,6 +23,6 @@ public sealed class UserCreateViewModel
 
     [Required]
     [Display(Name = "Role")]
-    [RegularExpression($"^({RoleNames.SupportAdmin}|{RoleNames.Analyst}|{RoleNames.TriageOfficer}|{RoleNames.CaseManager}|{RoleNames.AiReviewer})$", ErrorMessage = "Invalid role.")]
+    [RegularExpression($"^({RoleNames.UserAdmin}|{RoleNames.SupportAdmin}|{RoleNames.Analyst}|{RoleNames.TriageOfficer}|{RoleNames.CaseManager}|{RoleNames.AiReviewer})$", ErrorMessage = "Invalid role.")]
     public string Role { get; set; } = string.Empty;
 }

@@ -7,6 +7,7 @@
     static string RolePillClass(string role) => role switch
     {
         RoleNames.SupportAdmin => "bg-slatebrand-900 text-white",
+        RoleNames.UserAdmin => "bg-fuchsia-100 text-fuchsia-800",
         RoleNames.Analyst => "bg-slatebrand-100 text-slatebrand-700",
         RoleNames.TriageOfficer => "bg-amber-100 text-amber-800",
         RoleNames.CaseManager => "bg-sky-100 text-sky-800",
@@ -93,6 +94,7 @@
             <div>
                 <label asp-for="NewUser.Role" class="mb-2 block text-sm font-medium text-slatebrand-100"></label>
                 <select asp-for="NewUser.Role" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-slatebrand-50 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20">
+                    <option value="@RoleNames.UserAdmin">@RoleNames.UserAdmin</option>
                     <option value="@RoleNames.SupportAdmin">@RoleNames.SupportAdmin</option>
                     <option value="@RoleNames.Analyst">@RoleNames.Analyst</option>
                     <option value="@RoleNames.TriageOfficer">@RoleNames.TriageOfficer</option>

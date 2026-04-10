@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IssueSense.Web.Controllers;
 
-[Authorize(Roles = RoleNames.SupportAdmin)]
+[Authorize(Roles = RoleNames.UserManagers)]
 public sealed class UsersController(IUserService userService) : Controller
 {
     [HttpGet]

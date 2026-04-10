@@ -91,7 +91,7 @@ public sealed class ComplaintControllerTests
     public async Task Archive_WithoutComplaintId_RedirectsToIndex()
     {
         var serviceMock = new Mock<IComplaintService>();
-        var controller = CreateController(serviceMock.Object, RoleNames.SupportAdmin);
+        var controller = CreateController(serviceMock.Object, RoleNames.CaseManager);
 
         var result = await controller.Archive(" ", CancellationToken.None);
 
